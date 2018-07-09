@@ -45,7 +45,6 @@ def main():
     */
     GROUP BY device_id
     ORDER BY device_id
-
     '''
     cursor.execute(query_distinct)
     dist = cursor.fetchall()

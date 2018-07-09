@@ -54,8 +54,8 @@ class Root extends Component {
 
   _animate() {
     const timestamp = Date.now();
-    const loopLength = 60;
-    const loopTime = 60000;
+    const loopLength = 6;
+    const loopTime = 6000;
     //console.log("ANIMATION")
     this.setState({
       time: (timestamp % loopTime) / loopTime * loopLength
@@ -91,7 +91,7 @@ class Root extends Component {
           viewport={viewport}
           buildings={buildings}
           trips={trips}
-          trailLength={180}
+          trailLength={120}
           time={time}
         />
       </MapGL>
