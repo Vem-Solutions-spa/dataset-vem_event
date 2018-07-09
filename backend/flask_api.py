@@ -2,6 +2,7 @@ from flask import Flask
 from flask import jsonify
 from flask_cors import CORS
 import pymysql
+from random import randint
 
 app = Flask(__name__)
 CORS(app)
@@ -13,35 +14,41 @@ cursor = connection.cursor(pymysql.cursors.DictCursor)
 @app.route('/')
 def main():
     query = '''
-    SELECT device_id, DATE_FORMAT(`timestamp`, '%Y-%m-%d %H:%i:00') AS event_date, latitude, longitude
-    FROM prova
+    SELECT device_id, event_date, latitude, longitude, TIME_TO_SEC(event_date)/60 AS tts
+    FROM ridotto
     WHERE
-    latitude >= 45.066 AND
-    longitude >= 7.462 AND
-    latitude <= 45.068 AND
-    longitude <= 7.482 AND
-    DAY(`timestamp`) = 1
-    ORDER BY device_id, DATE_FORMAT(`timestamp`, '%Y-%m-%d %H:%i:00')
+    event_date >= '2017-06-15 15:44:00' AND
+    event_date <= '2017-06-15 15:54:00'
+    /*
+    latitude >= 45.08 AND
+    latitude <= 45.9 AND
+    longitude >= 7.60 AND
+    longitude <= 7.65
+    */
+
+    ORDER BY device_id, event_date
     '''
     cursor.execute(query)
     rv = cursor.fetchall()
 
     query_distinct = '''
-    SELECT device_id
-    FROM prova
+    SELECT device_id, MIN(TIME_TO_SEC(event_date)/60) AS min_tts
+    FROM ridotto
     WHERE
-    latitude >= 45.066 AND
-    longitude >= 7.462 AND
-    latitude <= 45.068 AND
-    longitude <= 7.482 AND
-    DAY(`timestamp`) = 1
+    event_date >= '2017-06-15 15:44:00' AND
+    event_date <= '2017-06-15 15:54:00'
+    /*
+    latitude >= 45.08 AND
+    latitude <= 45.9 AND
+    longitude >= 7.60 AND
+    longitude <= 7.65
+    */
     GROUP BY device_id
     ORDER BY device_id
+
     '''
     cursor.execute(query_distinct)
     dist = cursor.fetchall()
-
-    print(dist)
 
 
     results = []
@@ -51,16 +58,13 @@ def main():
             'color': [253, 128, 93],
             'segments': []
             }
-        indice = 1
         for row in rv:
             if row['device_id'] == car['device_id']:
-                punti = [row['longitude'], row['latitude'], indice]
-                indice += 1
+                punti = [row['longitude'], row['latitude'], int(row['tts'])- int(car['min_tts'])]
                 dati_riga['segments'].append(punti)
 
-
         results.append(dati_riga)
-        indice = 1
+
 
 
     return jsonify(results)

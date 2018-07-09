@@ -14,9 +14,9 @@ const LIGHT_SETTINGS = {
 export default class DeckGLOverlay extends Component {
   static get defaultViewport() {
     return {
-      longitude: 7.462061,  //-74,
-      latitude: 45.06628, //40.72,
-      zoom: 14,
+      longitude: 7.65,  //-74,
+      latitude: 45.1, //40.72,
+      zoom: 11,
       maxZoom: 16,
       pitch: 0, //45
       bearing: 0
@@ -25,11 +25,6 @@ export default class DeckGLOverlay extends Component {
 
   render() {
     const {viewport, buildings, trips, trailLength, time} = this.props;
-    /*
-    if (!buildings || !trips) {
-      return null;
-    }
-    */
 
     if (!trips) {
       console.log("ERRORE - DOVJS-REND")
