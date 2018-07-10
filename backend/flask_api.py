@@ -21,8 +21,8 @@ def main():
     min_time = '15:44'
     max_time = '15:54'
     min_lat = float(44.9941845)
-    max_lat = float(7.5991039)
-    min_long = float(45.1202965)
+    max_lat = float(45.1202965)
+    min_long = float(7.5991039)
     max_long = float(7.7697372)
 
     if request.args.get("date"):
@@ -49,8 +49,8 @@ def main():
         WHERE
         event_date >= '{0} {1}' AND
         event_date <= '{0} {2}' AND
-        latitude >= {3} AND latitude <= {5} AND
-        longitude >= {4} AND longitude <= {6}
+        latitude >= {3} AND latitude <= {4} AND
+        longitude >= {5} AND longitude <= {6}
 
         /*
         UNION
@@ -66,8 +66,6 @@ def main():
     ORDER BY device_id,  event_date
     '''.format(date, min_time, max_time, min_lat, max_lat, min_long, max_long)
 
-
-    print(query)
     cursor.execute(query)
     rv = cursor.fetchall()
 
@@ -77,7 +75,6 @@ def main():
         dist.add(row['device_id'])
         if int(row['tts']) < min_tts:
             min_tts = int(row['tts'])
-
     results = []
     for car in dist:
         color = [159, 229, 90]
