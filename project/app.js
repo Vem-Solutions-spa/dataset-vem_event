@@ -31,14 +31,12 @@ class Root extends Component {
       .then(resp => resp.json())
       .then(data => this.setState({buildings: data}));
     */
-
-  }
-
-  componentWillMount() {
     fetch('http://127.0.0.1:5000/')
       .then(resp => resp.json())
       .then(data => this.setState({trips: data}));
+
   }
+
 
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
@@ -52,6 +50,14 @@ class Root extends Component {
     }
   }
 
+  _animate(){
+    this.setState({
+      time: this.state.time + 1/120
+    });
+    this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
+  }
+
+/*
   _animate() {
     const timestamp = Date.now();
     const loopLength = 6;
@@ -62,7 +68,7 @@ class Root extends Component {
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
-
+*/
   _resize() {
     this._onViewportChange({
       width: window.innerWidth,
@@ -77,8 +83,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, buildings, trips, time} = this.state;
-    console.log(trips)
+    const {viewport, trips, time} = this.state;
 
     return (
       <MapGL
@@ -89,9 +94,8 @@ class Root extends Component {
       >
         <DeckGLOverlay
           viewport={viewport}
-          buildings={buildings}
           trips={trips}
-          trailLength={120}
+          trailLength={2}
           time={time}
         />
       </MapGL>

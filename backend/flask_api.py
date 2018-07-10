@@ -13,53 +13,45 @@ cursor = connection.cursor(pymysql.cursors.DictCursor)
 
 @app.route('/')
 def main():
+    datetime_start = '2017-06-15 15:44:00'
+    datetime_end = '2017-06-15 15:54:00'
+
+
     query = '''
-    SELECT device_id, event_date, latitude, longitude, TIME_TO_SEC(event_date)/60 AS tts
+
+	SELECT CONCAT('m-', CAST(device_id AS CHAR)) AS device_id, event_date, latitude, longitude, TIME_TO_SEC(event_date)/60 AS tts
     FROM ridotto
     WHERE
-    event_date >= '2017-06-15 15:44:00' AND
-    event_date <= '2017-06-15 15:54:00'
-    /*
-    latitude >= 45.08 AND
-    latitude <= 45.9 AND
-    longitude >= 7.60 AND
-    longitude <= 7.65
-    */
+    event_date >= '{0}' AND
+    event_date <= '{1}'
 
     ORDER BY device_id, event_date
-    '''
+    '''.format(datetime_start, datetime_end)
+    
     cursor.execute(query)
     rv = cursor.fetchall()
 
-    query_distinct = '''
-    SELECT device_id, MIN(TIME_TO_SEC(event_date)/60) AS min_tts
-    FROM ridotto
-    WHERE
-    event_date >= '2017-06-15 15:44:00' AND
-    event_date <= '2017-06-15 15:54:00'
-    /*
-    latitude >= 45.08 AND
-    latitude <= 45.9 AND
-    longitude >= 7.60 AND
-    longitude <= 7.65
-    */
-    GROUP BY device_id
-    ORDER BY device_id
-    '''
-    cursor.execute(query_distinct)
-    dist = cursor.fetchall()
-
+    dist = set()
+    min_tts = 1000000000
+    for row in rv:
+        dist.add(row['device_id'])
+        if int(row['tts']) < min_tts:
+            min_tts = int(row['tts'])
 
     results = []
     for car in dist:
+        color = [159, 229, 90]
+        if car[:1] == 's':
+            color = [253, 128, 93]
+
         dati_riga = {
-            'car_id': int(car['device_id']),
-            'color': [253, 128, 93],
+            'car_id': car,
+            'color': color,
             'segments': []
             }
         for row in rv:
-            if row['device_id'] == car['device_id']:
-                punti = [row['longitude'], row['latitude'], int(row['tts'])- int(car['min_tts'])]
+            if row['device_id'] == car:
+                punti = [row['longitude'], row['latitude'], int(row['tts']) - min_tts]
                 dati_riga['segments'].append(punti)
 
         results.append(dati_riga)

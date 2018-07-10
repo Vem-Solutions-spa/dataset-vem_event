@@ -67,7 +67,6 @@ export default class TripsLayer extends Layer {
     if (!data) {
       return;
     }
-
     const {getPath} = this.props;
     let vertexCount = 0;
     const pathLengths = data.reduce((acc, d) => {
@@ -136,6 +135,7 @@ export default class TripsLayer extends Layer {
     let index = 0;
     for (let i = 0; i < data.length; i++) {
       const color = getColor(data[i]);
+      console.log(data[i])
       const l = pathLengths[i];
       for (let j = 0; j < l; j++) {
         colors[index++] = color[0];
