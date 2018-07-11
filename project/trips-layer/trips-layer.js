@@ -67,7 +67,6 @@ export default class TripsLayer extends Layer {
     if (!data) {
       return;
     }
-
     const {getPath} = this.props;
     let vertexCount = 0;
     const pathLengths = data.reduce((acc, d) => {

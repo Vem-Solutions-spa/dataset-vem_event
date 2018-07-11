@@ -1,5 +1,5 @@
 {
-  "name": "trips",
+  "name": "3d-heatmap",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -7,8 +7,8 @@
     "start": "webpack-dev-server --progress --hot --open --host 0.0.0.0"
   },
   "dependencies": {
+    "d3-request": "^1.0.5",
     "deck.gl": "^5.2.0",
-    "luma.gl": "^5.2.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^3.2.0"

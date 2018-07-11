@@ -3,7 +3,7 @@ import DeckGL, {PolygonLayer} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
 const LIGHT_SETTINGS = {
-  lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
+  lightsPosition: [7.65, 45.1, 8000, -73.5, 41, 5000],
   ambientRatio: 0.05,
   diffuseRatio: 0.6,
   specularRatio: 0.8,
@@ -14,17 +14,17 @@ const LIGHT_SETTINGS = {
 export default class DeckGLOverlay extends Component {
   static get defaultViewport() {
     return {
-      longitude: 7.65,  //-74,
-      latitude: 45.1, //40.72,
+      longitude: 7.65,
+      latitude: 45.1,
       zoom: 11,
       maxZoom: 16,
-      pitch: 0, //45
+      pitch: 0,
       bearing: 0
     };
   }
 
   render() {
-    const {viewport, buildings, trips, trailLength, time} = this.props;
+    const {viewport, trips, trailLength, time} = this.props;
 
     if (!trips) {
       console.log("ERRORE - DOVJS-REND")
@@ -37,26 +37,13 @@ export default class DeckGLOverlay extends Component {
         id: 'trips',
         data: trips,
         getPath: d => d.segments,
+        //getColor: d => d.color,
         getColor: d => d.color,
-        opacity: 0.3,
-        strokeWidth: 2,
+        opacity: 0.5,
+        strokeWidth: 4,
         trailLength,
         currentTime: time
-      }),
-      /*
-      new PolygonLayer({
-        id: 'buildings',
-        data: buildings,
-        extruded: true,
-        wireframe: false,
-        fp64: true,
-        opacity: 0.5,
-        getPolygon: f => f.polygon,
-        getElevation: f => f.height,
-        getFillColor: f => [74, 80, 87],
-        lightSettings: LIGHT_SETTINGS
       })
-      */
     ];
 
     return <DeckGL {...viewport} layers={layers} />;
