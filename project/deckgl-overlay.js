@@ -27,8 +27,6 @@ export default class DeckGLOverlay extends Component {
     const {viewport, trips, trailLength, time} = this.props;
 
     if (!trips) {
-      console.log("ERRORE - DOVJS-REND")
-
       return null;
     }
 
@@ -39,8 +37,8 @@ export default class DeckGLOverlay extends Component {
         getPath: d => d.segments,
         //getColor: d => d.color,
         getColor: d => d.color,
-        opacity: 0.5,
-        strokeWidth: 4,
+        opacity: 1,
+        strokeWidth: 8,
         trailLength,
         currentTime: time
       })

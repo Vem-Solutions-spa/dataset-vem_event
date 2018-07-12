@@ -6,6 +6,11 @@ from random import randint
 from flask import request
 import numpy as np
 import pandas as pd
+import random
+from flask import send_file
+import os
+import json
+
 
 app = Flask(__name__)
 CORS(app)
@@ -16,6 +21,8 @@ cursor = connection.cursor(pymysql.cursors.DictCursor)
 
 @app.route('/')
 def main():
+
+    print('Richiesta ricevuta al MAIN')
 
     date = '2017-06-15'
     min_time = '15:44'
@@ -40,6 +47,15 @@ def main():
     if request.args.get("max_long"):
         max_long = float(request.args.get("max_long"))
 
+    print('''
+    event_date >= '{0} {1}' AND
+    event_date <= '{0} {2}' AND
+    latitude >= {3} AND latitude <= {4} AND
+    longitude >= {5} AND longitude <= {6}
+    '''.format(date, min_time, max_time, min_lat, max_lat, min_long, max_long)
+    )
+
+
     query = '''
     SELECT *
     FROM (
@@ -59,12 +75,16 @@ def main():
         FROM parking_each_min
         WHERE
         event_date >= '{0} {1}' AND
-        event_date <= '{0} {2}'
+        event_date <= '{0} {2}' AND
+        latitude >= {3} AND latitude <= {4} AND
+        longitude >= {5} AND longitude <= {6}
         */
 
     ) A
     ORDER BY device_id,  event_date
     '''.format(date, min_time, max_time, min_lat, max_lat, min_long, max_long)
+
+    print(query)
 
     cursor.execute(query)
     rv = cursor.fetchall()
@@ -75,6 +95,9 @@ def main():
         dist.add(row['device_id'])
         if int(row['tts']) < min_tts:
             min_tts = int(row['tts'])
+
+
+
     results = []
     for car in dist:
         color = [159, 229, 90]
@@ -86,7 +109,15 @@ def main():
             }
         for row in rv:
             if row['device_id'] == car:
-                punti = [row['longitude'], row['latitude'], int(row['tts']) - min_tts, row['status']]
+
+                lat = row['latitude']
+                long = row['longitude']
+
+                if row['status'] == 'parked':
+                    lat = lat + random.uniform(-0.0001, 0.0001)
+                    long = long + random.uniform(-0.0001, 0.0001)
+
+                punti = [long, lat, int(row['tts']) - min_tts, row['status']]
                 dati_riga['segments'].append(punti)
 
         results.append(dati_riga)
@@ -95,6 +126,23 @@ def main():
 
 @app.route('/heatmap')
 def heatmap():
+    if request.args.get("snap"):
+        if request.args.get("snap") == '1':
+            with open(os.path.join(os.path.dirname(app.instance_path), '14-20.json')) as f:
+                data = json.load(f)
+            return jsonify(data)
+
+        elif request.args.get("snap") == '2':
+            with open(os.path.join(os.path.dirname(app.instance_path), '21-20.json')) as f:
+                data = json.load(f)
+            return jsonify(data)
+            
+        elif request.args.get("snap") == '3':
+            with open(os.path.join(os.path.dirname(app.instance_path), '22-20.json')) as f:
+                data = json.load(f)
+            return jsonify(data)
+
+
 
     date = '2017-06-21'
     time = '20:00'

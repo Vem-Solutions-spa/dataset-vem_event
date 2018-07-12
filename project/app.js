@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
+import moment from 'moment'
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = 'pk.eyJ1Ijoic21iZCIsImEiOiJjamo3NTF4ZW4yZWRkM3BvNDM1aHVwMHFyIn0.ZVHV8w2p_03h5sy1l8-Y1w'; // eslint-disable-line
@@ -20,6 +21,27 @@ function findGetParameter(parameterName) {
     return result;
 }
 
+export default class Counter extends Component {
+
+  render() {
+    const {time, date_start, date_end} = this.props;
+    let timestamp = moment(date_start).add(parseInt(time), 'minutes').format("DD-MM-YYYY HH:mm:ss")
+
+    if(moment(date_start).add(parseInt(time), 'minutes') > moment(date_end)){
+      timestamp = moment(date_end).format("DD-MM-YYYY HH:mm:ss")
+    }
+
+    var h1Style = {
+      color: 'white'
+    };
+
+    return (
+      <h1 style={h1Style}>{timestamp}</h1>
+    );
+  }
+}
+
+
 class Root extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +53,9 @@ class Root extends Component {
       },
       buildings: null,
       trips: null,
-      time: 0
+      time: 0,
+      date_start: null,
+      date_end: null
     };
     /*
     fetch(DATA_URL.BUILDINGS)
@@ -63,7 +87,7 @@ class Root extends Component {
     console.log('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
     fetch('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
       .then(resp => resp.json())
-      .then(data => this.setState({trips: data}))
+      .then(data => this.setState({trips: data, date_start: moment(param_date + ' ' + param_min_time), date_end: moment(param_date + ' ' + param_max_time)}))
       .then(resp => this.setState({time: 0}));
 
   }
@@ -83,7 +107,7 @@ class Root extends Component {
 
   _animate(){
     this.setState({
-      time: this.state.time + 1/120
+      time: this.state.time + 1/60
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
@@ -114,7 +138,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, trips, time} = this.state;
+    const {viewport, trips, time, date_start, date_end} = this.state;
 
     return (
       <MapGL
@@ -123,6 +147,12 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
+        <Counter
+          time={time}
+          date_start={date_start}
+          date_end={date_end}
+        ></Counter>
+
         <DeckGLOverlay
           viewport={viewport}
           trips={trips}
