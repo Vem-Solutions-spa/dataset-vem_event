@@ -69,10 +69,13 @@ class Root extends Component {
     let param_max_long = findGetParameter('max_long')
 
     if(param_snap != null) {
-      console.log('http://194.116.76.192:5000/heatmap?snap=' + param_snap + '')
+      console.log('http://194.116.76.192:5000/trips')
 
-      fetch('http://194.116.76.192:5000/trips')
-        .then(data => this.setState({data: data.json(), date_start: moment('2017-06-21 17:00')}));
+      //fetch('http://194.116.76.192:5000/trips')
+      console.log('carico JSON')
+      fetch('./concerto.json')
+        .then(data => this.setState({trips: data.json(), date_start: moment('2017-06-21 17:00')}))
+        .then(data => console.log(this.state));
 
     } else if(param_date == null){
       param_date = '2017-06-15'
@@ -108,23 +111,11 @@ class Root extends Component {
 
   _animate(){
     this.setState({
-      time: this.state.time + 1/60
+      time: this.state.time + 1/5
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
 
-/*
-  _animate() {
-    const timestamp = Date.now();
-    const loopLength = 6;
-    const loopTime = 6000;
-    //console.log("ANIMATION")
-    this.setState({
-      time: (timestamp % loopTime) / loopTime * loopLength
-    });
-    this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
-  }
-*/
   _resize() {
     this._onViewportChange({
       width: window.innerWidth,
@@ -140,6 +131,8 @@ class Root extends Component {
 
   render() {
     const {viewport, trips, time, date_start, date_end} = this.state;
+
+    console.log(trips)
 
     return (
       <MapGL

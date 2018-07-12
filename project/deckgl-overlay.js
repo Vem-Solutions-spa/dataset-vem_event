@@ -38,7 +38,7 @@ export default class DeckGLOverlay extends Component {
         //getColor: d => d.color,
         getColor: d => d.color,
         opacity: 1,
-        strokeWidth: 8,
+        strokeWidth: 1,
         trailLength,
         currentTime: time
       })

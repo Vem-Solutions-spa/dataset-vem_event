@@ -62,9 +62,8 @@ def main():
     '''.format(date, min_time, max_time, min_lat, max_lat, min_long, max_long)
     )
 
-    query = 'SELECT * FROM trips_parks_sera_concerto ORDER BY device_id,  event_date'
-
-    query2 = '''
+    
+    query = '''
     SELECT * 
     FROM (
         
