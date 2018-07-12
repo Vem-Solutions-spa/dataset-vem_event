@@ -57,11 +57,9 @@ class Root extends Component {
       date_start: null,
       date_end: null
     };
-    /*
-    fetch(DATA_URL.BUILDINGS)
-      .then(resp => resp.json())
-      .then(data => this.setState({buildings: data}));
-    */
+
+    let param_snap = findGetParameter('snap')
+
     let param_date = findGetParameter('date')
     let param_min_time = findGetParameter('min_time')
     let param_max_time = findGetParameter('max_time')
@@ -70,8 +68,13 @@ class Root extends Component {
     let param_max_lat = findGetParameter('max_lat')
     let param_max_long = findGetParameter('max_long')
 
-    // date=2017-06-22&time=20:00&min_lat=44.9941845&max_lat=45.1202965&min_long=7.5991039&max_long=7.7697372
-    if(param_date == null){
+    if(param_snap != null) {
+      console.log('http://194.116.76.192:5000/heatmap?snap=' + param_snap + '')
+
+      fetch('http://194.116.76.192:5000/trips')
+        .then(data => this.setState({data: data.json(), date_start: moment('2017-06-21 17:00')}));
+
+    } else if(param_date == null){
       param_date = '2017-06-15'
       param_min_time = '15:44'
       param_max_time = '15:54'
@@ -80,15 +83,13 @@ class Root extends Component {
       param_max_lat = '45.1202965'
       param_max_long = '7.7697372'
 
-    }
-
-    // date=2017-06-22&min_time=15:00&max_time=15:05&min_lat=44.9941845&max_lat=45.1202965&min_long=7.5991039&max_long=7.7697372
-    //fetch('http://194.116.76.192:5000/')
-    console.log('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
-    fetch('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
+      console.log('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
+      fetch('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
       .then(resp => resp.json())
       .then(data => this.setState({trips: data, date_start: moment(param_date + ' ' + param_min_time), date_end: moment(param_date + ' ' + param_max_time)}))
       .then(resp => this.setState({time: 0}));
+
+    }
 
   }
 
