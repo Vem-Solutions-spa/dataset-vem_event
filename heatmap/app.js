@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-
+import moment from 'moment'
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
@@ -27,6 +27,23 @@ function findGetParameter(parameterName) {
     return result;
 }
 
+
+export default class Counter extends Component {
+
+  render() {
+    const {date_start} = this.props;
+    let timestamp = moment(date_start).format("DD-MM-YYYY HH:mm:ss")
+
+    var h1Style = {
+      color: 'white'
+    };
+
+    return (
+      <h1 style={h1Style}>{timestamp}</h1>
+    );
+  }
+}
+
 class Root extends Component {
   constructor(props) {
     super(props);
@@ -36,7 +53,8 @@ class Root extends Component {
         width: 500,
         height: 500
       },
-      data: null
+      data: null,
+      date_start: null
     };
 /*
     requestCsv(DATA_URL, (error, response) => {
@@ -48,6 +66,8 @@ class Root extends Component {
     });
 */
 
+    let param_snap = findGetParameter('snap')
+
     let param_date = findGetParameter('date')
     let param_time = findGetParameter('time')
     let param_min_lat = findGetParameter('min_lat')
@@ -56,7 +76,24 @@ class Root extends Component {
     let param_max_long = findGetParameter('max_long')
 
     // date=2017-06-22&time=20:00&min_lat=44.9941845&max_lat=45.1202965&min_long=7.5991039&max_long=7.7697372
-    if(param_date == null){
+
+    if(param_snap != null) {
+      let day = 14
+      if (param_snap == '1'){
+        day = 14
+      } else if (param_snap == '2'){
+        day = 21
+      } else if (param_snap == '3'){
+        day = 22
+      }
+      console.log('http://194.116.76.192:5000/heatmap?snap=' + param_snap + '')
+      console.log(day)
+
+      fetch('http://194.116.76.192:5000/heatmap?snap=' + param_snap + '')
+        .then(data => this.setState({data: data.json(), date_start: moment('2017-06-' + day + ' 20:00')}));
+    }
+
+    else if(param_date == null){
       param_date = '2017-06-22'
       param_time = '20:00'
       param_min_lat = '44.9941845'
@@ -64,12 +101,17 @@ class Root extends Component {
       param_max_lat = '45.1202965'
       param_max_long = '7.7697372'
 
-    }
-    fetch('http://194.116.76.192:5000/heatmap?date=' + param_date + '&time=' + param_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
+      fetch('http://194.116.76.192:5000/heatmap?date=' + param_date + '&time=' + param_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
+        .then(resp => resp.json())
+        .then(data => this.setState({data: data, date_start: moment(param_date + ' ' + param_time)}));
 
-    //fetch('http://194.116.76.192:5000/heatmap')
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
+    } else {
+      //194.116.76.192
+      fetch('http://194.116.76.192:5000/heatmap?date=' + param_date + '&time=' + param_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
+        .then(resp => resp.json())
+        .then(data => this.setState({data: data, date_start: moment(param_date + ' ' + param_time)}));
+    }
+
 
   }
 
@@ -92,7 +134,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {viewport, data, date_start} = this.state;
     console.log(data)
 
     return (
@@ -102,6 +144,9 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
+        <Counter
+          date_start={date_start}
+        ></Counter>
         <DeckGLOverlay viewport={viewport} data={data || []} />
       </MapGL>
     );

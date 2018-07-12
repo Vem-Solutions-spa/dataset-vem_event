@@ -6,12 +6,26 @@ from random import randint
 from flask import request
 import numpy as np
 import pandas as pd
+import random
+from flask import send_file
+import os
+import json
+
 
 app = Flask(__name__)
 CORS(app)
 
+# Setup Connessione al database
 connection = pymysql.connect("194.116.76.192", "bd7", "bd7", "final_project")
 cursor = connection.cursor(pymysql.cursors.DictCursor)
+
+# Per DEMO: Servo il JSON già preparato
+@app.route('/trips')
+def trips():
+    with open(os.path.join(os.path.dirname(app.instance_path), 'concerto.json')) as f:
+        data = json.load(f)
+    print('Invio JSON')
+    return jsonify(data)
 
 
 @app.route('/')
@@ -40,10 +54,20 @@ def main():
     if request.args.get("max_long"):
         max_long = float(request.args.get("max_long"))
 
-    query = '''
-    SELECT *
-    FROM (
+    print('''
+    event_date >= '{0} {1}' AND
+    event_date <= '{0} {2}' AND
+    latitude >= {3} AND latitude <= {4} AND
+    longitude >= {5} AND longitude <= {6}
+    '''.format(date, min_time, max_time, min_lat, max_lat, min_long, max_long)
+    )
 
+    query = 'SELECT * FROM trips_parks_sera_concerto ORDER BY device_id,  event_date'
+
+    query2 = '''
+    SELECT * 
+    FROM (
+        
         SELECT device_id, event_date, latitude, longitude, TIME_TO_SEC(event_date)/60 AS tts, 'moving' AS status
         FROM ridotto_full_month
         WHERE
@@ -51,7 +75,7 @@ def main():
         event_date <= '{0} {2}' AND
         latitude >= {3} AND latitude <= {4} AND
         longitude >= {5} AND longitude <= {6}
-
+        
         /*
         UNION
 
@@ -59,24 +83,37 @@ def main():
         FROM parking_each_min
         WHERE
         event_date >= '{0} {1}' AND
-        event_date <= '{0} {2}'
+        event_date <= '{0} {2}' AND
+        latitude >= {3} AND latitude <= {4} AND
+        longitude >= {5} AND longitude <= {6}
         */
-
     ) A
     ORDER BY device_id,  event_date
     '''.format(date, min_time, max_time, min_lat, max_lat, min_long, max_long)
 
+    print('eseguo query')
+
     cursor.execute(query)
     rv = cursor.fetchall()
 
+    print('query eseguita')
+
+    # Calcolo set auto univoche e timestamp di inizio
     dist = set()
     min_tts = 1000000000
     for row in rv:
         dist.add(row['device_id'])
         if int(row['tts']) < min_tts:
             min_tts = int(row['tts'])
+
+    print('set creato')
+
+    # Creo il JSON nel formato richiesto da deck.gl
     results = []
     for car in dist:
+        
+        print('Elaboro auto ' + str(len(results)) + ' su ' + str(len(dist)))
+
         color = [159, 229, 90]
 
         dati_riga = {
@@ -86,16 +123,46 @@ def main():
             }
         for row in rv:
             if row['device_id'] == car:
-                punti = [row['longitude'], row['latitude'], int(row['tts']) - min_tts, row['status']]
+
+                lat = row['latitude']
+                long = row['longitude']
+
+                if row['status'] == 'parked':
+                    lat = lat + random.uniform(-0.0001, 0.0001)
+                    long = long + random.uniform(-0.0001, 0.0001)
+
+                punti = [long, lat, int(row['tts']) - min_tts, row['status']]
                 dati_riga['segments'].append(punti)
 
         results.append(dati_riga)
+
+    print('lista creata')
+
+
 
     return jsonify(results)
 
 @app.route('/heatmap')
 def heatmap():
+    # Per DEMO: Servo il JSON già preparato
+    if request.args.get("snap"):
+        if request.args.get("snap") == '1':
+            with open(os.path.join(os.path.dirname(app.instance_path), '14-20.json')) as f:
+                data = json.load(f)
+            return jsonify(data)
 
+        elif request.args.get("snap") == '2':
+            with open(os.path.join(os.path.dirname(app.instance_path), '21-20.json')) as f:
+                data = json.load(f)
+            return jsonify(data)
+            
+        elif request.args.get("snap") == '3':
+            with open(os.path.join(os.path.dirname(app.instance_path), '22-20.json')) as f:
+                data = json.load(f)
+            return jsonify(data)
+
+
+    # Lettura parametri richiesta GET
     date = '2017-06-21'
     time = '20:00'
     min_lat = float(44.9941845)
@@ -127,6 +194,7 @@ def heatmap():
     return jsonify(lat_long)
 
 
+# Funzione per calcolo densità parcheggi in una griglia
 def detect_parks_grid(database_filename,date_hour,latitude_range,longitude_range,car_threshold,min_threshold,num_cell_v=100,num_cell_h=100):
 
     query_string = """SELECT car_id, X(start_pos) AS start_lon, Y(start_pos) AS start_lat, start_time, end_time,
