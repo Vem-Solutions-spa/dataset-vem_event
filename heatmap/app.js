@@ -6,14 +6,15 @@ import DeckGLOverlay from './deckgl-overlay.js';
 import moment from 'moment'
 import {csv as requestCsv} from 'd3-request';
 
-// Set your mapbox token here
+// Creare un token su mapbox.com e inserirlo qui 
 const MAPBOX_TOKEN = 'pk.eyJ1Ijoic21iZCIsImEiOiJjamo3NTF4ZW4yZWRkM3BvNDM1aHVwMHFyIn0.ZVHV8w2p_03h5sy1l8-Y1w'; // eslint-disable-line
 
-// Source data CSV
+// Source data CSV (non utilizzato)
 const DATA_URL =
   //'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'; // eslint-disable-line
   './June_24_grid_50_50_h20.csv'
 
+// Funzione per estrarre i parametri GET dall'URL
 function findGetParameter(parameterName) {
     var result = null,
         tmp = [];
@@ -28,6 +29,7 @@ function findGetParameter(parameterName) {
 }
 
 
+// Oggetto per mostrare il timestamp
 export default class Counter extends Component {
 
   render() {
@@ -77,6 +79,7 @@ class Root extends Component {
 
     // date=2017-06-22&time=20:00&min_lat=44.9941845&max_lat=45.1202965&min_long=7.5991039&max_long=7.7697372
 
+    // Se esiste il parametro snap effettuo una chiamata a un file preesistente
     if(param_snap != null) {
       let day = 14
       if (param_snap == '1'){
@@ -92,7 +95,7 @@ class Root extends Component {
       fetch('http://194.116.76.192:5000/heatmap?snap=' + param_snap + '')
         .then(data => this.setState({data: data.json(), date_start: moment('2017-06-' + day + ' 20:00')}));
     }
-
+    // Altrimenti scrivo i parametri nell'url normalmente
     else if(param_date == null){
       param_date = '2017-06-22'
       param_time = '20:00'
@@ -106,7 +109,6 @@ class Root extends Component {
         .then(data => this.setState({data: data, date_start: moment(param_date + ' ' + param_time)}));
 
     } else {
-      //194.116.76.192
       fetch('http://194.116.76.192:5000/heatmap?date=' + param_date + '&time=' + param_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
         .then(resp => resp.json())
         .then(data => this.setState({data: data, date_start: moment(param_date + ' ' + param_time)}));
@@ -135,7 +137,6 @@ class Root extends Component {
 
   render() {
     const {viewport, data, date_start} = this.state;
-    console.log(data)
 
     return (
       <MapGL

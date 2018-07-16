@@ -27,7 +27,7 @@ def trips():
     print('Invio JSON')
     return jsonify(data)
 
-
+# Servo la chiamata a trips
 @app.route('/')
 def main():
 
@@ -62,7 +62,7 @@ def main():
     '''.format(date, min_time, max_time, min_lat, max_lat, min_long, max_long)
     )
 
-    
+    # Nella query metto tutti i punti in movimento UNION tutti i punti fermi
     query = '''
     SELECT * 
     FROM (
@@ -126,6 +126,7 @@ def main():
                 lat = row['latitude']
                 long = row['longitude']
 
+                # Siccome la visualizzazione non supporta i punti fermi se la macchina è parcheggiata sposto in modo random l'auto di qualche metro
                 if row['status'] == 'parked':
                     lat = lat + random.uniform(-0.0001, 0.0001)
                     long = long + random.uniform(-0.0001, 0.0001)
@@ -136,11 +137,10 @@ def main():
         results.append(dati_riga)
 
     print('lista creata')
-
-
-
     return jsonify(results)
 
+
+# Endpoint per heatmap
 @app.route('/heatmap')
 def heatmap():
     # Per DEMO: Servo il JSON già preparato
@@ -267,4 +267,5 @@ def detect_parks_grid(database_filename,date_hour,latitude_range,longitude_range
 
 
 if __name__ == '__main__':
+    # Servo la pagina con connessione libera, sulla porta 5000
     app.run(debug=True, host='0.0.0.0', port=5000)

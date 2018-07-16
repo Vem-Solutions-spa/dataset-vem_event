@@ -5,9 +5,11 @@ import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
 import moment from 'moment'
 
-// Set your mapbox token here
+// Creare un token su mapbox.com e inserirlo qui 
 const MAPBOX_TOKEN = 'pk.eyJ1Ijoic21iZCIsImEiOiJjamo3NTF4ZW4yZWRkM3BvNDM1aHVwMHFyIn0.ZVHV8w2p_03h5sy1l8-Y1w'; // eslint-disable-line
 
+
+// Funzione per estrarre i parametri GET dall'url
 function findGetParameter(parameterName) {
     var result = null,
         tmp = [];
@@ -21,6 +23,7 @@ function findGetParameter(parameterName) {
     return result;
 }
 
+// Oggetto per mostrare il timestamp
 export default class Counter extends Component {
 
   render() {
@@ -58,6 +61,8 @@ class Root extends Component {
       date_end: null
     };
 
+    // Parametri del GET. Se non ci sono vengono forzati automaticamente
+
     let param_snap = findGetParameter('snap')
 
     let param_date = findGetParameter('date')
@@ -68,11 +73,8 @@ class Root extends Component {
     let param_max_lat = findGetParameter('max_lat')
     let param_max_long = findGetParameter('max_long')
 
+    // Se viene passato il parametro SNAP carico il JSON già compilato.
     if(param_snap != null) {
-      console.log('http://194.116.76.192:5000/trips')
-
-      //fetch('http://194.116.76.192:5000/trips')
-      console.log('carico JSON')
       fetch('./concerto.json')
         .then(data => this.setState({trips: data.json(), date_start: moment('2017-06-21 17:00')}))
         .then(data => console.log(this.state));
@@ -86,6 +88,8 @@ class Root extends Component {
       param_max_lat = '45.1202965'
       param_max_long = '7.7697372'
 
+
+      // Chiamata API al backend
       console.log('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
       fetch('http://194.116.76.192:5000?date=' + param_date + '&min_time=' + param_min_time + '&max_time=' + param_max_time + '&min_lat=' + param_min_lat + '&max_lat=' + param_max_lat + '&min_long=' + param_min_long + '&max_long=' + param_max_long + '')
       .then(resp => resp.json())
@@ -111,6 +115,7 @@ class Root extends Component {
 
   _animate(){
     this.setState({
+      // Ogni frame (30 o 60 al secondo) aumento il tempo di 1/5. time corrisponde ai minuti (vedi componente COUNTER)
       time: this.state.time + 1/5
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
@@ -131,8 +136,6 @@ class Root extends Component {
 
   render() {
     const {viewport, trips, time, date_start, date_end} = this.state;
-
-    console.log(trips)
 
     return (
       <MapGL

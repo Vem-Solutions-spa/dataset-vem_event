@@ -13,6 +13,7 @@ const LIGHT_SETTINGS = {
 
 export default class DeckGLOverlay extends Component {
   static get defaultViewport() {
+    // Questo per modificare le coordinate e lo zoom di default
     return {
       longitude: 7.65,
       latitude: 45.1,
