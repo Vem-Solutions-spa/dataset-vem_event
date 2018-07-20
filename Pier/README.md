@@ -14,7 +14,7 @@ create_fines_for_qgis.ipynb
 data/fines.csv
 data/fines_for_qgis.csv
 
-# 3. join the parkings dataset with the parking fines dataset and analisys of the covariance between number of parkings and number of fines
+# 3. join the parkings dataset with the parking fines dataset and analysis of the covariance between number of parkings and number of fines
 files:
 analysis parking density vs parking fines.ipynb
 data/fines.csv
